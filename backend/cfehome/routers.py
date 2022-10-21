@@ -5,4 +5,4 @@ from products.viewsets import ProductViewSet, ProductGenericViewSet
 router = DefaultRouter()
 router.register('products-abc', ProductGenericViewSet)
 urlpatterns = router.urls
-print(urlpatterns)
+# print(urlpatterns)
