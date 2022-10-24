@@ -146,5 +146,6 @@ REST_FRAMEWORK ={
 
 ALGOLIA = {
     'APPLICATION_ID': 'R44ZGL8TN0',
-    'API_KEY': 'YourWriteAPIKey'
+    'API_KEY': 'd16cba59ebdb4320c381975e273a3a0c',
+    'INDEX_PREFIX': 'cfe',
 }
