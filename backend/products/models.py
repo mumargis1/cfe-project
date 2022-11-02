@@ -1,10 +1,11 @@
+import random
 from django.db import models
 from django.conf import settings
 from django.db.models import Q
 
 User = settings.AUTH_USER_MODEL
 
-TAGS_MODEL_VALUES = 
+# TAGS_MODEL_VALUES = 
 class ProductQuerySet(models.QuerySet):
     def is_public(self):
         return self.filter(public=True)
