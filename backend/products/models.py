@@ -4,7 +4,7 @@ from django.db.models import Q
 
 User = settings.AUTH_USER_MODEL
 
-
+TAGS_MODEL_VALUES = 
 class ProductQuerySet(models.QuerySet):
     def is_public(self):
         return self.filter(public=True)
@@ -34,7 +34,11 @@ class Product(models.Model):
     public = models.BooleanField(default=True)
 
     objects = ProductManager()
-
+    def is_public(self)-> bool:
+        return self.public
+    
+    
+    
     @property
     def sale_price(self):
         return "%.2f" %(float(self.price)*0.8)
