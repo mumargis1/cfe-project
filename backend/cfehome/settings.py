@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     # third party api services
     'algoliasearch_django',
     # third party packages
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -54,6 +56,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -62,6 +65,17 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'cfehome.urls'
+CORS_URLS_REGEX = r"^/api/.*"
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8111',
+    'https://localhost:8111',
+]
+# if DEBUG:
+#     CORS_ALLOWED_ORIGINS += [
+#     'http://localhost:8111',
+#     'https://localhost:8111',
+# ]
+
 
 TEMPLATES = [
     {
@@ -139,6 +153,8 @@ REST_FRAMEWORK ={
         "rest_framework.authentication.SessionAuthentication",
         "api.authentication.TokenAuthentication",
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+
+
     ],
     "DEFAULT_PERMISSION_CLASSES" : [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly"
@@ -151,4 +167,10 @@ ALGOLIA = {
     'APPLICATION_ID': 'R44ZGL8TN0',
     'API_KEY': 'd16cba59ebdb4320c381975e273a3a0c',
     'INDEX_PREFIX':'cfe',
+}
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ["Bearer"],
+    "ACCESS_TOKEN_LIFEtIME": datetime.timedelta(seconds=30),
+    "RECFESH_TOKEN_LIFETIME": datetime.timedelta(minutes=1),
 }
