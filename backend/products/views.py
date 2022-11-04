@@ -54,9 +54,9 @@ class ProductUpdateView(
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
-
-    def perfoem_update(self, serializer):
-        instance = serializer.svae()
+    print("performing update")
+    def perform_update(self, serializer):
+        instance = serializer.save()
         if not instance.content:
             instance.content = instance.title
 product_update_view = ProductUpdateView.as_view()

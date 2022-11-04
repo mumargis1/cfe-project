@@ -13,8 +13,8 @@ class SearchListView(generics.GenericAPIView):
         if request.user.is_authenticated:
             user = request.user.username
         query = request.GET.get('q')
-        tag = request.GET.get('tag') or None
         public = str(request.GET.get('public')) != "0"
+        tag = request.GET.get('tag') or None
         print(user, query, public, tag)
         if not query:
             return Response('', status=400)

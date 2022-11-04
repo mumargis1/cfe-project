@@ -5,7 +5,8 @@ from django.db.models import Q
 
 User = settings.AUTH_USER_MODEL
 
-# TAGS_MODEL_VALUES = 
+TAGS_MODEL_VALUES = ['electronics', 'cars', 'boats', 'movies', 'cameras']
+
 class ProductQuerySet(models.QuerySet):
     def is_public(self):
         return self.filter(public=True)
@@ -35,11 +36,29 @@ class Product(models.Model):
     public = models.BooleanField(default=True)
 
     objects = ProductManager()
+
     def is_public(self)-> bool:
         return self.public
     
+    def get_tags_list(self):
+        return [random.choice(TAGS_MODEL_VALUES)]   
+
+    def get_absolute_url(self):
+        return f"/api/products/{self.pk}/"
     
+    @property
+    def endpoint(self):
+        return self.get_absolute_url()
+
+
+    @property
+    def path(self):
+        return f"/products/{self.pk}/" 
     
+    @property
+    def body(self):
+        return self.content
+
     @property
     def sale_price(self):
         return "%.2f" %(float(self.price)*0.8)
