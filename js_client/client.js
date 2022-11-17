@@ -1,10 +1,18 @@
 const contentContainer = document.getElementById('content-container')
 const loginForm = document.getElementById('login-form')
+const searchForm = document.getElementById('search-form')
 const baseEndpoint = "http://localhost:8000/api"
 if (loginForm) {
     loginForm.addEventListener('submit', handleLogin)
 }
 
+if (searchForm){
+    searchForm.addEventListener('submit', handleSerach)
+}
+// function handleLogin(event){
+//     console.log(event)
+//     event.preventDefault()
+// }
 function handleLogin(event) {
     event.preventDefault()
     const loginEndpoint = `${baseEndpoint}/token/`
@@ -35,6 +43,54 @@ function handleLogin(event) {
     })
 }
 
+function handleSerach(event){
+    event.preventDefault()
+
+    let formData = new FormData(searchForm)
+    let data = Object.fromEntries(formData)
+    let serachParam = new URLSearchParams(data)
+    const endpoint = `${baseEndpoint}/search/?${serachParam}`
+    const headers = {
+        "Content-Type": "application/json"
+    }
+    const authToken = localStorage.getItem('access')
+    if (authToken){
+        headers['Authorization'] = `Bearer  ${authToken}`
+    }
+    const options = {
+        method: "GET",
+        headers: headers
+    }
+    fetch(endpoint, options)
+    .then(response=>{
+        console.log(response)
+        return response.json()
+    })
+    .then(data => {
+        const validData = isTokenNotValid(data)
+        if (validData && contentContainer){
+            contentContainer.innerHTML = ""
+            if (data && data.hits){
+                let htmlStr = ""
+                for (let result of data.hits){
+                    htmlStr += "<li>" + result.title +"</li>"
+                }
+                contentContainer.innerHTML = htmlStr
+                if (data.hits.length === 0){
+                    contentContainer.innerHTML = "<p>No result found</p>"
+                }
+            } else {
+                contentContainer.innerHTML = "<p>No result found</p>"
+            }
+        }
+        // console.log(data.hits)
+        // writeToContainer(data)
+    })
+    .catch(err=>{
+        console.log('err', err)
+    })
+}
+
 function handleAuthData(authData, callback){
     localStorage.setItem('access', authData.access )
     localStorage.setItem('refresh', authData.refresh)
@@ -45,21 +101,118 @@ function handleAuthData(authData, callback){
 
 function writeToContainer(data) {
     if (contentContainer) {
-        contentContainer.innerHTML="<pre>"+ JSON.stringify(data) + "<pre>"
+        contentContainer.innerHTML="<pre>"+ JSON.stringify(data, null, 4) + "</pre>"
     }
 }
-function getProductList() {
-    const endpoint = `${baseEndpoint}/products/`
-    const options = {
-        method : "GET",
+
+function getFetchItem(method, body){
+    return   {
+        method : method === null ? "GET": method,
         headers : {
-            "Content-Type": "application/json"
-        }
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('access')}`
+        },
+        body: body ? body : null
+    }
+}
+function isTokenNotValid(jsonData){
+    if (jsonData.code && jaonData.code === "token_not_valid"){
+        alert("Please login again")
+        return false
+    }
+    return true
+
+}
+function validateJWTToken(){
+    const endpoint = `${baseEndpoint}/token/verify/`
+    const options = {
+        method: "POST",
+        headers: {
+            "content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            token: localStorage.getItem('access')
+        })
     }
     fetch(endpoint, options)
     .then(response=>response.json())
+    // .then(x=>( ))
+}
+function getProductList() {
+    const endpoint = `${baseEndpoint}/products/`
+    const options = getFetchItem()
+    fetch(endpoint, options)
+    .then(response=>{
+        return response.json()
+    })
     .then(data=>{
-        console.log(data)
-        writeToContainer(data)
+        const validData = isTokenNotValid(data)
+        if (validData){
+            writeToContainer(data)
+        }
+
     })
 }
+
+validateJWTToken()
+
+
+
+const searchClient = algoliasearch("R44ZGL8TN0", "ac88e49bba6ce1953af8e236f3532c42")
+
+// const search = instantsearch({
+//     indexName: 'cfe_Product',
+//     searchClient,
+// });
+
+// search.addWidgets([
+//     instantsearch.widgets.searchBox({
+//         container: "#searchbox",
+//     }),
+//     instantsearch.widgets.hits({
+//         container: "#hits",
+//     })
+// ]);
+
+const search = instantsearch({
+    indexName: 'cfe_Product',
+    searchClient,
+  });
+
+  search.addWidgets([
+    instantsearch.widgets.searchBox({
+      container: '#searchbox',
+    }),
+
+      instantsearch.widgets.clearRefinements({
+      container: "#clear-refinements"
+      }),
+
+
+    instantsearch.widgets.refinementList({
+        container: "#user-list",
+        attribute: 'user'
+    }),
+    instantsearch.widgets.refinementList({
+      container: "#public-list",
+      attribute: 'public'
+  }),
+
+
+    instantsearch.widgets.hits({
+      container: '#hits',
+      templates: {
+          item: `
+              <div>
+                  <div>{{#helpers.highlight}}{ "attribute": "title" }{{/helpers.highlight}}</div>
+                  <div>{{#helpers.highlight}}{ "attribute": "body" }{{/helpers.highlight}}</div>
+
+                  <p>{{ user }}</p><p>\${{ price }}
+
+
+              </div>`
+      }
+    })
+  ]);
+
+  search.start();
